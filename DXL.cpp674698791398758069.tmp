@@ -1,0 +1,92 @@
+#include <DynamixelSDK.h>
+#include "DXL.h"
+
+//Init DXL Port and Packet Handler
+
+//dynamixel::PacketHandler *packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
+
+int getHandler(dynamixel::PacketHandler *packetHandler){
+  packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
+
+  return 1;
+}
+
+int DXLinit(){
+  dynamixel::PortHandler *portHandler     = dynamixel::PortHandler::getPortHandler(DEVICENAME);
+  
+  dynamixel::PacketHandler *packetHandler;
+  getHandler(packetHandler);
+  
+  
+  // Open port
+  if (portHandler->openPort())
+  {
+    Serial.print("Succeeded to open the port!\n");
+  }
+  else
+  {
+    Serial.print("Failed to open the port!\n");
+    Serial.print("Press any key to terminate...\n");
+    return -1;
+  }
+
+  //set baudrate
+  if (portHandler->setBaudRate(BAUDRATE))
+  {
+    Serial.print("Succeeded to change the baudrate!\n");
+  }
+  else
+  {
+    Serial.print("Failed to change the baudrate!\n");
+    Serial.print("Press any key to terminate...\n");
+    return -1;
+  }
+  
+  int dxlRoll_comm_result  = COMM_TX_FAIL;            
+  int dxlPitch_comm_result = COMM_TX_FAIL;             
+  int dxlYaw_comm_result   = COMM_TX_FAIL;
+  uint8_t dxlRoll_error  = 0;                         
+  uint8_t dxlPitch_error = 0;                          
+  uint8_t dxlYaw_error   = 0;                              
+
+  //Enable Torque
+  dxlRoll_comm_result  = packetHandler->write1ByteTxRx(portHandler, ROLL_ID , ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE, &dxlRoll_error);
+  //dxlPitch_comm_result = packetHandler->write1ByteTxRx(portHandler, PITCH_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE, &dxlPitch_error);
+  //dxlYaw_comm_result   = packetHandler->write1ByteTxRx(portHandler, YAW_ID  , ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE, &dxlYaw_error);
+
+  while(1){
+    Serial.println("HERE2");
+    delay(500);
+  }
+  
+  if ( (dxlRoll_comm_result || dxlPitch_comm_result || dxlYaw_comm_result) != COMM_SUCCESS )
+  {
+    packetHandler->printTxRxResult(dxlRoll_comm_result);
+    packetHandler->printTxRxResult(dxlPitch_comm_result);
+    packetHandler->printTxRxResult(dxlYaw_comm_result);
+  }
+  else if ( (dxlRoll_error || dxlPitch_error || dxlYaw_error) != 0)
+  {
+    packetHandler->printRxPacketError(dxlRoll_error);
+    packetHandler->printRxPacketError(dxlPitch_error);
+    packetHandler->printRxPacketError(dxlYaw_error);
+  }
+  else
+  {
+    Serial.print("Dynamixels has been successfully connected \n");
+  }
+
+  return 1;
+}
+
+int DXLenable(uint8_t DXL_ID){
+  
+
+  
+  return 1;
+}
+
+int DXLenableAll(){}             //enable all DXLs
+int DXLdisable(uint8_t DXL_ID){} //disable single DXL
+int DXLdisableAll(){}     
+
